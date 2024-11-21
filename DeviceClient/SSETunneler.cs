@@ -1,34 +1,70 @@
-﻿namespace DeviceClient;
+﻿using Google.Protobuf;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-public class SSETunneler
+namespace DeviceClient
 {
-    private readonly HttpClient _httpClient;
-
-    public SSETunneler(HttpClient httpClient) { _httpClient = httpClient; }
-
-    public async Task Start(string yarpPushChannel)
+    public class SSETunneler
     {
-        try
+        private readonly HttpClient _httpClient;
+
+        public SSETunneler(HttpClient httpClient) { _httpClient = httpClient; }
+
+        public async Task Start(string yarpPushChannel, string yarpResponseChannel)
         {
-            using var response = await _httpClient.GetAsync("http://yarp-server/push-channel", HttpCompletionOption.ResponseHeadersRead);
-            using var stream = await response.Content.ReadAsStreamAsync();
-
-            var buffer = new byte[4096];
-            while (true)
+            try
             {
-                var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (bytesRead == 0)
-                    break;
-
-                var message = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                Console.WriteLine($"Received: {message}");
+                using var SSEResponse = await _httpClient.GetAsync(yarpPushChannel, HttpCompletionOption.ResponseHeadersRead);
+                using var stream = await SSEResponse.Content.ReadAsStreamAsync();
                 
-                // Handle the received HTTP request
+                while (true)
+                {
+                    try
+                    {
+                        stream.Position = 0;
+                        var protoHttpRequest = ProtoHttpRequest.Parser.ParseDelimitedFrom(stream);
+                        var response = await _httpClient.SendAsync(await protoHttpRequest.FromProtoHttpRequestAsync());
+                        var responseBody = await response.Content.ReadAsStringAsync();
+                        var protoHttpResponse = new ProtoHttpResponse
+                        {
+                            StatusCode = (int)response.StatusCode,
+                            Body = responseBody,
+                            Headers = { response.Headers.Select(header => new Header { Key = header.Key, Value = header.Value.First() }) }
+                        };
+
+                        var content = new ByteArrayContent(protoHttpResponse.ToByteArray());
+                        content.Headers.Add("X-Request-Id", protoHttpRequest.Headers.Where(x => x.Key == "X-Request-Id").Select(x => x.Value).FirstOrDefault());
+                        await _httpClient.PostAsync(yarpResponseChannel, content);
+                    }
+                    catch (InvalidProtocolBufferException ex)
+                    {
+                        Console.WriteLine($"Protobuf parsing error: {ex.Message}");
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
-        catch (Exception ex)
+    }
+
+    public static class HttpRequestExtensions
+    {
+        public static async Task<HttpRequestMessage> FromProtoHttpRequestAsync(this ProtoHttpRequest protoHttpRequest)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            var httpRequestMessage = new HttpRequestMessage
+            {
+                Method = new HttpMethod(protoHttpRequest.Method),
+                RequestUri = new Uri(protoHttpRequest.PathAndQuery, UriKind.Relative),
+                Content = new StringContent(protoHttpRequest.Body)
+            };
+            foreach (var header in protoHttpRequest.Headers)
+            {
+                httpRequestMessage.Headers.Add(header.Key, header.Value);
+            }
+            return httpRequestMessage;
         }
     }
 }

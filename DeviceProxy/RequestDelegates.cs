@@ -1,4 +1,5 @@
 ﻿using DeviceProxy;
+using Google.Protobuf;
 
 namespace DeviceClient;
 
@@ -67,7 +68,8 @@ public static class RequestDelegates
         requestAwaiter.SetResult(protoResponse);
     };
 
-    public static RequestDelegate PushChannelRequestDelegate = async context => {
+    public static RequestDelegate PushChannelRequestDelegate = async context =>
+    {
         context.Response.ContentType = "text/event-stream";
 
         var serialNumber = context.Request.RouteValues["serialNumber"]?.ToString();
@@ -86,6 +88,7 @@ public static class RequestDelegates
             var requestId = queue.Dequeue(serialNumber);
             if (requestId == null)
             {
+                await Task.Delay(100); // Avoid tight loop
                 continue;
             }
 
@@ -95,12 +98,27 @@ public static class RequestDelegates
                 continue;
             }
 
-
             // Simulate waiting for incoming HTTP requests to forward
             var requestData = await requestAwaiter.Request.ToProtoHttpRequestAsync(serialNumber);
+            requestData.Headers.Add(new Header
+            {
+                Key = "X-Request-Id",
+                Value = requestId.ToString()
+            });
 
-            // Push the HTTP request to the client
-            await context.Response.WriteAsync(requestData.ToString());
+            await context.Response.WriteAsync("data: ");
+
+            // Serialize the Protobuf message to a memory stream
+            using (var memoryStream = new MemoryStream())
+            {
+                requestData.WriteDelimitedTo(memoryStream);
+                memoryStream.Seek(0, SeekOrigin.Begin); // Reset stream position
+
+                // Write the serialized data asynchronously to the response
+                await memoryStream.CopyToAsync(context.Response.Body);
+            }
+
+            await context.Response.WriteAsync("\n\n");
             await context.Response.Body.FlushAsync();
         }
     };

@@ -17,7 +17,7 @@ public class OngoingRequests
     {
         _memoryCache.Set(requestAwaiter.RequestId, requestAwaiter, new MemoryCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+            AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2),
             PostEvictionCallbacks = {
                 CancelRequestAwaiter
             }
@@ -27,11 +27,14 @@ public class OngoingRequests
     private PostEvictionCallbackRegistration CancelRequestAwaiter => new() {
         EvictionCallback = (key, value, reason, state) =>
         {
-            _logger.LogWarning("Request {Key} was evicted from the cache with reason {Reason}", key, reason);
-            if(value is RequestAwaiter requestAwaiter)
+            if (reason > EvictionReason.Replaced)
             {
-                _logger.LogWarning("Canceling request {RequestId}", requestAwaiter.RequestId);
-                requestAwaiter.SetCanceled();
+                _logger.LogWarning("Request {Key} was evicted from the cache with reason {Reason}", key, reason);
+                if (value is RequestAwaiter requestAwaiter)
+                {
+                    _logger.LogWarning("Canceling request {RequestId}", requestAwaiter.RequestId);
+                    requestAwaiter.SetCanceled();
+                }
             }
         }
     };
