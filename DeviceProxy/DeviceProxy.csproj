@@ -5,15 +5,12 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
-        <PublishAot>false</PublishAot>
+        <PublishAot>true</PublishAot>
+        <RootNamespace>DeviceProxy</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Grpc.Tools" Version="2.62.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.7" />
+      <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
     </ItemGroup>
 
     <ItemGroup>

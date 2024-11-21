@@ -8,6 +8,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomApi", "RandomApi\Rand
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedObjects", "SharedObjects\SharedObjects.csproj", "{24EB2A42-0587-496A-9D4E-C0BCA8414485}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceProxy", "DeviceProxy\DeviceProxy.csproj", "{3951D3D1-B380-4BD9-A330-9667C0AD80E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceProxyBalancer", "DeviceProxyBalancer\DeviceProxyBalancer.csproj", "{F3F6A9AF-B170-4183-86BB-85498A94C8D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceClient", "DeviceClient\DeviceClient.csproj", "{A0178326-00F9-4054-99E1-13526C4E7373}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +36,17 @@ Global
 		{24EB2A42-0587-496A-9D4E-C0BCA8414485}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24EB2A42-0587-496A-9D4E-C0BCA8414485}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24EB2A42-0587-496A-9D4E-C0BCA8414485}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3951D3D1-B380-4BD9-A330-9667C0AD80E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3951D3D1-B380-4BD9-A330-9667C0AD80E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3951D3D1-B380-4BD9-A330-9667C0AD80E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3951D3D1-B380-4BD9-A330-9667C0AD80E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3F6A9AF-B170-4183-86BB-85498A94C8D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3F6A9AF-B170-4183-86BB-85498A94C8D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3F6A9AF-B170-4183-86BB-85498A94C8D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3F6A9AF-B170-4183-86BB-85498A94C8D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0178326-00F9-4054-99E1-13526C4E7373}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0178326-00F9-4054-99E1-13526C4E7373}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0178326-00F9-4054-99E1-13526C4E7373}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0178326-00F9-4054-99E1-13526C4E7373}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
