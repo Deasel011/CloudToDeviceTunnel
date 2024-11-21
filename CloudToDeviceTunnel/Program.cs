@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 var builder = WebApplication.CreateSlimBuilder(args);
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<DualIndexMapping<ConnectionId, DeviceId>>();
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Debug);
 var app = builder.Build();
 
 ConcurrentDictionary<string,DeviceWebSocketHandler> deviceWebsocketHandlers = new();
@@ -42,7 +44,7 @@ app.Map("/device/{deviceId}/tunnel/{*catchall}", async (HttpContext context, str
     var protoHttpResponseBytes = await deviceHubContext.Clients.Client(connectionId)
         .InvokeAsync<byte[]>("ProtoHttpRequest", protoHttpRequest.ToByteArray(), ct);
     var protoHttpResponse = ProtoHttpResponse.Parser.ParseFrom(protoHttpResponseBytes);
-    return Results.Content(protoHttpResponse.Body, protoHttpResponse.Headers.FirstOrDefault(x => x.Key == "Content-Type")?.Value ?? "text/plain", contentEncoding: null, protoHttpResponse.StatusCode);
+    return Results.Content(protoHttpResponse.Body, protoHttpResponse.Headers.FirstOrDefault(x => x.Key == "Content-Type")?.Value ?? "text/html", contentEncoding: null, protoHttpResponse.StatusCode);
 });
 
 app.Run();
